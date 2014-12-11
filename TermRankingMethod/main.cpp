@@ -26,7 +26,7 @@ int main(int argc, const char * argv[]) {
     // Get sound wave.
     std::vector<double> tmp;
     Wave wav;
-    if(wav.InputWave("/Users/KeisukeKarijuku/Dropbox/sample.wav") != 0)
+    if(wav.InputWave("/sample.wav") != 0)
         return -1;
     wav.StereoToMono();
     wav.GetData(tmp);
