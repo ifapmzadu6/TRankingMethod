@@ -111,7 +111,7 @@ public:
         std::cout << "[TermRankingMethod] End Calculate" << std::endl;
     }
     
-    std::vector<double> output(std::vector<double> &inputsignal, int dataCount) {
+    std::vector<double> output(std::vector<double> &inputsignal, int &dataCount) {
         std::vector<double> outputs;
         std::vector<double> inputs;
         for (int i=0; i<memoryOfModel; i++) {
@@ -142,18 +142,16 @@ public:
     
     
     // k番目の予測関数出力
-    std::vector<double> predictionFunctionOutputs(std::vector<double> &inputsignal, std::vector<double> alpha, int &k) {
+    std::vector<double> predictionFunctionOutputs(std::vector<double> &inputsignal, std::vector<double> &alpha, int &k) {
         std::vector<double> outputs;
         
         for (int i=0; i<inputsignal.size()-memoryOfModel; i++) {
             double output = 0.0;
             for (int rbfIndex=0; rbfIndex<k; rbfIndex++) {
-                // ノルムの計算
                 double squeredNorm = 0.0;
                 for (int j=0; j<memoryOfModel; j++) {
                     squeredNorm += pow((inputsignal[i+j] - rbfs[rbfIndex][j]), 2);
                 }
-                // RBFの計算
                 double spread = 1.0;
                 output += alpha[rbfIndex] * exp(- spread * squeredNorm);
             }
@@ -169,12 +167,10 @@ public:
         for (int rbfIndex=0; rbfIndex<rbfCount; rbfIndex++) {
             std::vector<double> vector;
             for (int i=0; i<inputsignal.size()-memoryOfModel; i++) {
-                // ノルムの計算
                 double squeredNorm = 0.0;
                 for (int j=0; j<memoryOfModel; j++) {
                     squeredNorm += pow((inputsignal[i+j] - rbfs[rbfIndex][j]), 2);
                 }
-                // RBFの計算
                 double spread = 1.0;
                 double output = exp(- spread * squeredNorm);
                 
@@ -193,15 +189,13 @@ public:
         auto iiter_end = inputsignal.end();
         auto oiter = output.begin();
         while (iiter != iiter_end) {
-            double distance = (*oiter) - (*iiter);
-            numerator += pow(distance, 2);
+            numerator += pow((*oiter - *iiter), 2);
             ++iiter; ++oiter;
         }
-        
         return numerator / denominator;
     }
     
-    // 方程式を解く
+    
     std::vector<double> solveLeastSquaresMethod(std::vector<std::vector<double>> &vA, std::vector<double> &vy) {
         
         Eigen::MatrixXd A(vA[0].size(), vA.size());
@@ -221,16 +215,15 @@ public:
         // Gt*G*o = Gt*y
         Eigen::VectorXd o = (gtg).colPivHouseholderQr().solve(gty);
         
-        std::vector<double> vo;
+        std::vector<double> vo(o.size());
         for (int i=0; i<o.size(); i++) {
-            vo.push_back(o[i]);
+            vo[i] = o[i];
         }
         
         return vo;
     }
     
-    // ベクターの平均
-    double averageInVector(std::vector<double> vector) {
+    double averageInVector(std::vector<double> &vector) {
         double average = 0.0;
         auto iter = vector.begin();
         auto iter_end = vector.end();

@@ -17,10 +17,10 @@
 
 int main(int argc, const char * argv[]) {
     
-    int rbfCount = 100;
+    int rbfCount = 150;
     int memoryOfModel = 8;
     
-    int dataCount = 4410;
+    int dataCount = 2000;
     int startDataCount = 1000;
     
     // Get sound wave.
