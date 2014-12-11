@@ -64,8 +64,8 @@ public:
         
         // 入力の平均
         double averageForInput = averageInVector(inputsignal);
-        // 入力の平均との差分
-        double denominator = diffBetweenVectorAndValue(inputsignal, averageForInput);
+        // 入力の平均と入力の差分
+        double diffInputsignalAndAverage = diffBetweenVectorAndValue(inputsignal, averageForInput);
         
         
         for (int iter=0; iter<rbfCount; iter++) {
@@ -81,7 +81,7 @@ public:
             std::vector<double> squaredErrors;
             for (int k=0; k<rbfCount; k++) {
                 std::vector<double> predictionOutputs = predictionFunctionOutputs(inputsignal, talpha, k);
-                double squaredError = errorOfOneStepPrediction(inputsignal, predictionOutputs, denominator);
+                double squaredError = errorOfOneStepPrediction(inputsignal, predictionOutputs, diffInputsignalAndAverage);
                 squaredErrors.push_back(squaredError);
             }
             
@@ -109,7 +109,7 @@ public:
             }
         }
         
-        // 係数alphaの決定 
+        // 最適化後、係数alphaの決定
         std::vector<std::vector<double>> A = getPhis(inputsignal);
         alpha = solveLeastSquaresMethod(A, inputsignal);
         
@@ -130,7 +130,7 @@ public:
                 for (int j=0; j<memoryOfModel; j++) {
                     squeredNorm += pow((inputs[j] - rbfs[rbfIndex][j]), 2);
                 }
-                output += alpha[rbfIndex] * exp(- spread * squeredNorm);
+                output += alpha[rbfIndex] * exp(-spread*squeredNorm);
             }
             
             for (int t=memoryOfModel-1; t>0; t--) {
@@ -153,9 +153,9 @@ public:
             for (int rbfIndex=0; rbfIndex<k; rbfIndex++) {
                 double squeredNorm = 0.0;
                 for (int j=0; j<memoryOfModel; j++) {
-                    squeredNorm += pow((inputsignal[i+j] - rbfs[rbfIndex][j]), 2);
+                    squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex][j]), 2);
                 }
-                output += alpha[rbfIndex] * exp(- spread * squeredNorm);
+                output += alpha[rbfIndex] * exp(-spread*squeredNorm);
             }
             outputs.push_back(output);
         }
@@ -170,9 +170,9 @@ public:
             for (int i=0; i<dataCount-memoryOfModel; i++) {
                 double squeredNorm = 0.0;
                 for (int j=0; j<memoryOfModel; j++) {
-                    squeredNorm += pow((inputsignal[i+j] - rbfs[rbfIndex][j]), 2);
+                    squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex][j]), 2);
                 }
-                double output = exp(- spread * squeredNorm);
+                double output = exp(-spread*squeredNorm);
                 
                 vector.push_back(output);
             }
@@ -219,7 +219,6 @@ public:
         for (int i=0; i<o.size(); i++) {
             vo[i] = o[i];
         }
-        
         return vo;
     }
     
@@ -234,15 +233,15 @@ public:
         return average/vector.size();
     }
     
-    double diffBetweenVectorAndValue(std::vector<double> &vector1, double &value) {
-        double denominator = 0.0;
-        auto iter = vector1.begin();
-        auto iter_end = vector1.end();
+    double diffBetweenVectorAndValue(std::vector<double> &vector, double &value) {
+        double diff = 0.0;
+        auto iter = vector.begin();
+        auto iter_end = vector.end();
         while (iter != iter_end) {
-            denominator += pow((*iter - value), 2);
+            diff += pow((*iter - value), 2);
             ++iter;
         }
-        return denominator;
+        return diff;
     }
 };
 

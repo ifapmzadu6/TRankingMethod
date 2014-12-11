@@ -390,10 +390,8 @@
 			children = (
 				71301A361A2B8128007A8CE4 /* main.cpp */,
 				71301BA91A2B85B0007A8CE4 /* TermRankingMethod.h */,
-				715309DA1A391941002CDEC7 /* analysis.cpp */,
-				715309DB1A391941002CDEC7 /* analysis.h */,
-				715309DC1A391941002CDEC7 /* Wave.cpp */,
-				715309DD1A391941002CDEC7 /* Wave.h */,
+				714C30251A39EF5600533FF3 /* analysis */,
+				714C30261A39EF6000533FF3 /* Wave */,
 				71301A3D1A2B8236007A8CE4 /* Eigen */,
 			);
 			path = TermRankingMethod;
@@ -1024,6 +1022,24 @@
 				71301BA01A2B8237007A8CE4 /* UmfPackSupport.h */,
 			);
 			path = UmfPackSupport;
+			sourceTree = "<group>";
+		};
+		714C30251A39EF5600533FF3 /* analysis */ = {
+			isa = PBXGroup;
+			children = (
+				715309DA1A391941002CDEC7 /* analysis.cpp */,
+				715309DB1A391941002CDEC7 /* analysis.h */,
+			);
+			name = analysis;
+			sourceTree = "<group>";
+		};
+		714C30261A39EF6000533FF3 /* Wave */ = {
+			isa = PBXGroup;
+			children = (
+				715309DC1A391941002CDEC7 /* Wave.cpp */,
+				715309DD1A391941002CDEC7 /* Wave.h */,
+			);
+			name = Wave;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
