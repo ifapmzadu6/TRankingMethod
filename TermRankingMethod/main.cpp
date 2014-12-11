@@ -18,7 +18,7 @@
 int main(int argc, const char * argv[]) {
     
     int rbfCount = 150;
-    int memoryOfModel = 8;
+    int memoryOfModel = 10;
     
     int dataCount = 2000;
     int startDataCount = 1000;
@@ -26,7 +26,7 @@ int main(int argc, const char * argv[]) {
     // Get sound wave.
     std::vector<double> tmp;
     Wave wav;
-    if(wav.InputWave("/sample.wav") != 0)
+    if(wav.InputWave("sample.wav") != 0)
         return -1;
     wav.StereoToMono();
     wav.GetData(tmp);

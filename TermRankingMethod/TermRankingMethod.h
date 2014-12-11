@@ -25,8 +25,15 @@ class TermRankingMethod {
     // RBF(rbfCount, memoryOfModel)
     std::vector<std::vector<double>> rbfs;
     
-    // 係数alpha
+    // RBFの係数
+    double spread;
+    
+    // TermRanking係数alpha
     std::vector<double> alpha;
+    
+    // 入力データ数
+    double dataCount;
+    
     
     
 public:
@@ -35,18 +42,17 @@ public:
     TermRankingMethod(int rbfCount, int memoryOfModel) : rbfCount(rbfCount), memoryOfModel(memoryOfModel) {
         std::random_device random_device;
         std::mt19937 mt(random_device());
-        std::uniform_real_distribution<double> score(0.0, 1.0);
-        
+        std::uniform_real_distribution<double> score(-0.1, 1.1);
         for (int i=0; i<rbfCount; i++) {
             std::vector<double> tmpVector;
-            
             for (int j=0; j<memoryOfModel; j++) {
                 double random = score(mt);
                 tmpVector.push_back(random);
             }
-            
             rbfs.push_back(tmpVector);
         }
+        
+        spread = 1.0;
     }
     
     
@@ -54,14 +60,13 @@ public:
     void calculate(std::vector<double> &inputsignal) {
         std::cout << "[TermRankingMethod] Start Calculate" << std::endl;
         
+        dataCount = inputsignal.size();
+        
         // 入力の平均
         double averageForInput = averageInVector(inputsignal);
-        double denominator = 0.0;
-        auto iiter = inputsignal.begin();
-        while (iiter != inputsignal.end()) {
-            denominator += pow((*iiter - averageForInput), 2);
-            ++iiter;
-        }
+        // 入力の平均との差分
+        double denominator = diffBetweenVectorAndValue(inputsignal, averageForInput);
+        
         
         for (int iter=0; iter<rbfCount; iter++) {
             std::cout << "[TermRankingMethod] Calculate K = " << iter << std::endl;
@@ -104,7 +109,7 @@ public:
             }
         }
         
-        // 係数alphaの決定
+        // 係数alphaの決定 
         std::vector<std::vector<double>> A = getPhis(inputsignal);
         alpha = solveLeastSquaresMethod(A, inputsignal);
         
@@ -125,7 +130,6 @@ public:
                 for (int j=0; j<memoryOfModel; j++) {
                     squeredNorm += pow((inputs[j] - rbfs[rbfIndex][j]), 2);
                 }
-                double spread = 1.0;
                 output += alpha[rbfIndex] * exp(- spread * squeredNorm);
             }
             
@@ -144,20 +148,17 @@ public:
     // k番目の予測関数出力
     std::vector<double> predictionFunctionOutputs(std::vector<double> &inputsignal, std::vector<double> &alpha, int &k) {
         std::vector<double> outputs;
-        
-        for (int i=0; i<inputsignal.size()-memoryOfModel; i++) {
+        for (int i=0; i<dataCount-memoryOfModel; i++) {
             double output = 0.0;
             for (int rbfIndex=0; rbfIndex<k; rbfIndex++) {
                 double squeredNorm = 0.0;
                 for (int j=0; j<memoryOfModel; j++) {
                     squeredNorm += pow((inputsignal[i+j] - rbfs[rbfIndex][j]), 2);
                 }
-                double spread = 1.0;
                 output += alpha[rbfIndex] * exp(- spread * squeredNorm);
             }
             outputs.push_back(output);
         }
-        
         return outputs;
     }
     
@@ -166,12 +167,11 @@ public:
         
         for (int rbfIndex=0; rbfIndex<rbfCount; rbfIndex++) {
             std::vector<double> vector;
-            for (int i=0; i<inputsignal.size()-memoryOfModel; i++) {
+            for (int i=0; i<dataCount-memoryOfModel; i++) {
                 double squeredNorm = 0.0;
                 for (int j=0; j<memoryOfModel; j++) {
                     squeredNorm += pow((inputsignal[i+j] - rbfs[rbfIndex][j]), 2);
                 }
-                double spread = 1.0;
                 double output = exp(- spread * squeredNorm);
                 
                 vector.push_back(output);
@@ -234,7 +234,16 @@ public:
         return average/vector.size();
     }
     
-    
+    double diffBetweenVectorAndValue(std::vector<double> &vector1, double &value) {
+        double denominator = 0.0;
+        auto iter = vector1.begin();
+        auto iter_end = vector1.end();
+        while (iter != iter_end) {
+            denominator += pow((*iter - value), 2);
+            ++iter;
+        }
+        return denominator;
+    }
 };
 
 #endif /* defined(__TermRankingMethod__TermRankingMethod__) */
