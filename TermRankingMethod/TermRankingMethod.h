@@ -16,6 +16,9 @@
 #include "Eigen/Dense"
 
 class TermRankingMethod {
+public:
+
+    
     // RBFの数f
     int rbfCount;
     
@@ -35,14 +38,11 @@ class TermRankingMethod {
     double dataCount;
     
     
-    
-public:
-    
     // コンストラクタ
     TermRankingMethod(int rbfCount, int memoryOfModel) : rbfCount(rbfCount), memoryOfModel(memoryOfModel) {
         std::random_device random_device;
         std::mt19937 mt(random_device());
-        std::uniform_real_distribution<double> score(-0.1, 1.1);
+        std::uniform_real_distribution<double> score(-1.1, 1.1);
         for (int i=0; i<rbfCount; i++) {
             std::vector<double> tmpVector;
             for (int j=0; j<memoryOfModel; j++) {
@@ -52,7 +52,7 @@ public:
             rbfs.push_back(tmpVector);
         }
         
-        spread = 1.0;
+        spread = 1;
     }
     
     
@@ -95,6 +95,7 @@ public:
                 informationDiscrepancys.push_back(informationDiscrepancy);
             }
             
+            
             // 並び替え＆先頭固定
             for (int tk=iter; tk<rbfCount-iter; tk++) {
                 for (int k=tk; k<rbfCount-1-tk; k++) {
@@ -108,6 +109,7 @@ public:
                 }
             }
         }
+        
         
         // 最適化後、係数alphaの決定
         std::vector<std::vector<double>> A = getPhis(inputsignal);
@@ -143,7 +145,6 @@ public:
         
         return outputs;
     }
-    
     
     // k番目の予測関数出力
     std::vector<double> predictionFunctionOutputs(std::vector<double> &inputsignal, std::vector<double> &alpha, int &k) {
@@ -192,7 +193,7 @@ public:
             numerator += pow((*oiter - *iiter), 2);
             ++iiter; ++oiter;
         }
-        return numerator / denominator;
+        return numerator/denominator;
     }
     
     
@@ -242,6 +243,55 @@ public:
             ++iter;
         }
         return diff;
+    }
+    
+    // MARK: File Input
+    void readAlpha(std::string fileName) {
+        std::vector<double> vector;
+        std::ifstream alphaIstream(fileName);
+        for (int i=0; i<rbfCount; i++) {
+            std::string string;
+            std::getline(alphaIstream, string);
+            double value = std::stof(string);
+            vector.push_back(value);
+        }
+        alpha = vector;
+    }
+    
+    void readRBFs(std::string fileName) {
+        std::vector<std::vector<double>> matrix;
+        std::ifstream rbfsIstream(fileName);
+        for (int i=0; i<rbfCount; i++) {
+            std::vector<double> vector;
+            for (int j=0; j<memoryOfModel; j++) {
+                std::string string;
+                std::getline(rbfsIstream, string, ',');
+                double value = std::stof(string);
+                vector.push_back(value);
+            }
+            matrix.push_back(vector);
+        }
+        rbfs = matrix;
+    }
+    
+    // MARK: File output
+    
+    void writeAlpha(std::string fileName) {
+        std::ofstream alphaFstream(fileName);
+        for (int i=0; i<rbfCount; i++) {
+            alphaFstream << alpha[i] << std::endl;
+        }
+        alphaFstream.close();
+    }
+    
+    void writeRBFs(std::string fileName) {
+        std::ofstream rbfsFstream(fileName);
+        for (int i=0; i<rbfCount; i++) {
+            for (int j=0; j<memoryOfModel; j++) {
+                rbfsFstream << rbfs[i][j] << ",";
+            }
+        }
+        rbfsFstream.close();
     }
 };
 

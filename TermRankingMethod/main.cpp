@@ -17,10 +17,10 @@
 
 int main(int argc, const char * argv[]) {
     
-    int rbfCount = 150;
-    int memoryOfModel = 10;
+    int rbfCount = 100;
+    int memoryOfModel = 7;
     
-    int dataCount = 2000;
+    int dataCount = 10000;
     int startDataCount = 1000;
     
     // Get sound wave.
@@ -29,18 +29,9 @@ int main(int argc, const char * argv[]) {
     if(wav.InputWave("sample.wav") != 0)
         return -1;
     wav.StereoToMono();
+    wav.Normalize();
     wav.GetData(tmp);
     std::cout << tmp.size() << std::endl;
-    
-    // Nomilization
-    double max = 0, min = std::numeric_limits<double>::max();
-    for (int i=startDataCount; i<startDataCount+dataCount; i++) {
-        if (max < tmp[i]) max = tmp[i];
-        if (min > tmp[i]) min = tmp[i];
-    }
-    for (int i=startDataCount; i<startDataCount+dataCount; i++) {
-        tmp[i] = (tmp[i] - min)/(max - min);
-    }
     
     // Cropped Input
     std::vector<double> inputsignal;
@@ -48,10 +39,21 @@ int main(int argc, const char * argv[]) {
         inputsignal.push_back(tmp[i]);
     }
     
+    
     // Term Ranking Method
     TermRankingMethod termRankingMethod(rbfCount, memoryOfModel);
-    termRankingMethod.calculate(inputsignal);
+    bool readFromFile = false;
+    if (!readFromFile) {
+        termRankingMethod.calculate(inputsignal);
+    }
+    else {
+        termRankingMethod.readAlpha("alpha.txt");
+        termRankingMethod.readRBFs("rbfs.txt");
+    }
     std::vector<double> outputsignal = termRankingMethod.output(inputsignal, dataCount);
+    
+    termRankingMethod.writeAlpha("alpha.txt");
+    termRankingMethod.writeRBFs("rbfs.txt");
     
     // Error
     double error = 0;
