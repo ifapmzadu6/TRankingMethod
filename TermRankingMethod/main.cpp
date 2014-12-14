@@ -20,7 +20,7 @@ int main(int argc, const char * argv[]) {
     int rbfCount = 100;
     int memoryOfModel = 7;
     
-    int dataCount = 10000;
+    int dataCount = 5000;
     int startDataCount = 1000;
     
     // Get sound wave.
@@ -43,12 +43,12 @@ int main(int argc, const char * argv[]) {
     // Term Ranking Method
     TermRankingMethod termRankingMethod(rbfCount, memoryOfModel);
     bool readFromFile = false;
-    if (!readFromFile) {
-        termRankingMethod.calculate(inputsignal);
-    }
-    else {
+    if (readFromFile) {
         termRankingMethod.readAlpha("alpha.txt");
         termRankingMethod.readRBFs("rbfs.txt");
+    }
+    else {
+        termRankingMethod.calculate(inputsignal);
     }
     std::vector<double> outputsignal = termRankingMethod.output(inputsignal, dataCount);
     

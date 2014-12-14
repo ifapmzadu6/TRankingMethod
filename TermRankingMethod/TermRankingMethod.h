@@ -111,7 +111,7 @@ public:
         }
         
         
-        // 最適化後、係数alphaの決定
+        // 最適化終了後、係数alphaの保存
         std::vector<std::vector<double>> A = getPhis(inputsignal);
         alpha = solveLeastSquaresMethod(A, inputsignal);
         
@@ -128,11 +128,16 @@ public:
         for (int i=0; i<dataCount; i++) {
             double output = 0.0;
             for (int rbfIndex=0; rbfIndex<rbfCount; rbfIndex++) {
-                double squeredNorm = 0.0;
-                for (int j=0; j<memoryOfModel; j++) {
-                    squeredNorm += pow((inputs[j] - rbfs[rbfIndex][j]), 2);
+                if (rbfIndex==0) {
+                    output += alpha[0];
                 }
-                output += alpha[rbfIndex] * exp(-spread*squeredNorm);
+                else {
+                    double squeredNorm = 0.0;
+                    for (int j=0; j<memoryOfModel; j++) {
+                        squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex][j]), 2);
+                    }
+                    output += alpha[rbfIndex] * exp(-spread*squeredNorm);
+                }
             }
             
             for (int t=memoryOfModel-1; t>0; t--) {
@@ -151,11 +156,16 @@ public:
         for (int i=0; i<dataCount-memoryOfModel; i++) {
             double output = 0.0;
             for (int rbfIndex=0; rbfIndex<k; rbfIndex++) {
-                double squeredNorm = 0.0;
-                for (int j=0; j<memoryOfModel; j++) {
-                    squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex][j]), 2);
+                if (rbfIndex==0) {
+                    output += alpha[0];
                 }
-                output += alpha[rbfIndex] * exp(-spread*squeredNorm);
+                else {
+                    double squeredNorm = 0.0;
+                    for (int j=0; j<memoryOfModel; j++) {
+                        squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex][j]), 2);
+                    }
+                    output += alpha[rbfIndex] * exp(-spread*squeredNorm);
+                }
             }
             outputs.push_back(output);
         }
@@ -167,11 +177,17 @@ public:
         for (int rbfIndex=0; rbfIndex<rbfCount; rbfIndex++) {
             std::vector<double> vector;
             for (int i=0; i<dataCount-memoryOfModel; i++) {
-                double squeredNorm = 0.0;
-                for (int j=0; j<memoryOfModel; j++) {
-                    squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex][j]), 2);
+                double output;
+                if (rbfIndex==0) {
+                    output = 1.0;
                 }
-                double output = exp(-spread*squeredNorm);
+                else {
+                    double squeredNorm = 0.0;
+                    for (int j=0; j<memoryOfModel; j++) {
+                        squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex][j]), 2);
+                    }
+                    output = exp(-spread*squeredNorm);
+                }
                 
                 vector.push_back(output);
             }
