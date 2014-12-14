@@ -57,7 +57,7 @@ public:
     
     
     // 実行
-    void calculate(std::vector<double> &inputsignal) {
+    void calculate(const std::vector<double> &inputsignal) {
         std::cout << "[TermRankingMethod] Start Calculate" << std::endl;
         
         dataCount = inputsignal.size();
@@ -118,7 +118,7 @@ public:
         std::cout << "[TermRankingMethod] End Calculate" << std::endl;
     }
     
-    std::vector<double> output(std::vector<double> &inputsignal, int &dataCount) {
+    std::vector<double> output(const std::vector<double> &inputsignal, const int &dataCount) const {
         std::vector<double> outputs;
         std::vector<double> inputs;
         for (int i=0; i<memoryOfModel; i++) {
@@ -142,12 +142,11 @@ public:
             
             outputs.push_back(output);
         }
-        
         return outputs;
     }
     
     // k番目の予測関数出力
-    std::vector<double> predictionFunctionOutputs(std::vector<double> &inputsignal, std::vector<double> &alpha, int &k) {
+    std::vector<double> predictionFunctionOutputs(const std::vector<double> &inputsignal, const std::vector<double> &alpha, const int &k) const {
         std::vector<double> outputs;
         for (int i=0; i<dataCount-memoryOfModel; i++) {
             double output = 0.0;
@@ -163,9 +162,8 @@ public:
         return outputs;
     }
     
-    std::vector<std::vector<double>> getPhis(std::vector<double> &inputsignal) {
+    std::vector<std::vector<double>> getPhis(const std::vector<double> &inputsignal) const {
         std::vector<std::vector<double>> phis;
-        
         for (int rbfIndex=0; rbfIndex<rbfCount; rbfIndex++) {
             std::vector<double> vector;
             for (int i=0; i<dataCount-memoryOfModel; i++) {
@@ -179,12 +177,11 @@ public:
             }
             phis.push_back(vector);
         }
-        
         return phis;
     }
     
     // ワンステップ誤差を出力
-    double errorOfOneStepPrediction(const std::vector<double> &inputsignal, const std::vector<double> &output, double &denominator) {
+    double errorOfOneStepPrediction(const std::vector<double> &inputsignal, const std::vector<double> &output, double &denominator) const {
         double numerator = 0.0;
         auto iiter = inputsignal.begin();
         auto iiter_end = inputsignal.end();
@@ -197,8 +194,7 @@ public:
     }
     
     
-    std::vector<double> solveLeastSquaresMethod(std::vector<std::vector<double>> &vA, std::vector<double> &vy) {
-        
+    std::vector<double> solveLeastSquaresMethod(const std::vector<std::vector<double>> &vA, const std::vector<double> &vy) const {
         Eigen::MatrixXd A(vA[0].size(), vA.size());
         Eigen::VectorXd y(vy.size()-memoryOfModel);
         
@@ -223,7 +219,7 @@ public:
         return vo;
     }
     
-    double averageInVector(std::vector<double> &vector) {
+    double averageInVector(const std::vector<double> &vector) const {
         double average = 0.0;
         auto iter = vector.begin();
         auto iter_end = vector.end();
@@ -234,7 +230,7 @@ public:
         return average/vector.size();
     }
     
-    double diffBetweenVectorAndValue(std::vector<double> &vector, double &value) {
+    double diffBetweenVectorAndValue(const std::vector<double> &vector, const double &value) const {
         double diff = 0.0;
         auto iter = vector.begin();
         auto iter_end = vector.end();
@@ -276,7 +272,7 @@ public:
     
     // MARK: File output
     
-    void writeAlpha(std::string fileName) {
+    void writeAlpha(std::string fileName) const {
         std::ofstream alphaFstream(fileName);
         for (int i=0; i<rbfCount; i++) {
             alphaFstream << alpha[i] << std::endl;
@@ -284,7 +280,7 @@ public:
         alphaFstream.close();
     }
     
-    void writeRBFs(std::string fileName) {
+    void writeRBFs(std::string fileName) const {
         std::ofstream rbfsFstream(fileName);
         for (int i=0; i<rbfCount; i++) {
             for (int j=0; j<memoryOfModel; j++) {
