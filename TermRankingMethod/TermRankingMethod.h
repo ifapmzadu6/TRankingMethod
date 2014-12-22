@@ -51,8 +51,7 @@ public:
             }
             rbfs.push_back(tmpVector);
         }
-        
-        spread = 1;
+        spread = 1.0;
     }
     
     
@@ -104,7 +103,9 @@ public:
                         informationDiscrepancys[k] = informationDiscrepancys[k+1];
                         informationDiscrepancys[k+1] = tmpA;
                         
-                        rbfs[k].swap(rbfs[k+1]);
+                        auto tmp = rbfs[k];
+                        rbfs[k] = rbfs[k+1];
+                        rbfs[k+1] = tmp;
                     }
                 }
             }
@@ -114,6 +115,7 @@ public:
         // 最適化終了後、係数alphaの保存
         std::vector<std::vector<double>> A = getPhis(inputsignal);
         alpha = solveLeastSquaresMethod(A, inputsignal);
+        
         
         std::cout << "[TermRankingMethod] End Calculate" << std::endl;
     }
@@ -134,7 +136,7 @@ public:
                 else {
                     double squeredNorm = 0.0;
                     for (int j=0; j<memoryOfModel; j++) {
-                        squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex][j]), 2);
+                        squeredNorm += pow((inputs[i+j]-rbfs[rbfIndex][j]), 2);
                     }
                     output += alpha[rbfIndex] * exp(-spread*squeredNorm);
                 }
@@ -203,7 +205,7 @@ public:
         auto iiter_end = inputsignal.end();
         auto oiter = output.begin();
         while (iiter != iiter_end) {
-            numerator += pow((*oiter - *iiter), 2);
+            numerator += pow((*oiter-*iiter), 2);
             ++iiter; ++oiter;
         }
         return numerator/denominator;
@@ -251,7 +253,7 @@ public:
         auto iter = vector.begin();
         auto iter_end = vector.end();
         while (iter != iter_end) {
-            diff += pow((*iter - value), 2);
+            diff += pow((*iter-value), 2);
             ++iter;
         }
         return diff;

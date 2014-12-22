@@ -356,6 +356,7 @@
 		715309DB1A391941002CDEC7 /* analysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = analysis.h; sourceTree = "<group>"; };
 		715309DC1A391941002CDEC7 /* Wave.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Wave.cpp; sourceTree = "<group>"; };
 		715309DD1A391941002CDEC7 /* Wave.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Wave.h; sourceTree = "<group>"; };
+		71A8D9F91A453E8500B300A2 /* LorenzSystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LorenzSystem.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -390,6 +391,7 @@
 			children = (
 				71301A361A2B8128007A8CE4 /* main.cpp */,
 				71301BA91A2B85B0007A8CE4 /* TermRankingMethod.h */,
+				71A8D9F91A453E8500B300A2 /* LorenzSystem.h */,
 				714C30251A39EF5600533FF3 /* analysis */,
 				714C30261A39EF6000533FF3 /* Wave */,
 				71301A3D1A2B8236007A8CE4 /* Eigen */,

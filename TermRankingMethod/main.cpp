@@ -14,14 +14,18 @@
 #include "Wave.h"
 //#include "analysis.h"
 
+#include "LorenzSystem.h"
+
 
 int main(int argc, const char * argv[]) {
     
-    int rbfCount = 100;
-    int memoryOfModel = 7;
+    int rbfCount = 200;
+    int memoryOfModel = 10;
     
     int dataCount = 5000;
     int startDataCount = 1000;
+    
+    bool readFromFile = false;
     
     // Get sound wave.
     std::vector<double> tmp;
@@ -42,7 +46,6 @@ int main(int argc, const char * argv[]) {
     
     // Term Ranking Method
     TermRankingMethod termRankingMethod(rbfCount, memoryOfModel);
-    bool readFromFile = false;
     if (readFromFile) {
         termRankingMethod.readAlpha("alpha.txt");
         termRankingMethod.readRBFs("rbfs.txt");
@@ -55,12 +58,14 @@ int main(int argc, const char * argv[]) {
     termRankingMethod.writeAlpha("alpha.txt");
     termRankingMethod.writeRBFs("rbfs.txt");
     
+    
     // Error
     double error = 0;
     for (int i=0; i<dataCount; i++) {
         error += pow((inputsignal[i]-outputsignal[i]), 2);
     }
     std::cout << error << std::endl;
+    
     
     // Gnuplot
     std::ofstream fstream("result.txt");
