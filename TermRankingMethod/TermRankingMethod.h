@@ -43,6 +43,7 @@ public:
         std::random_device random_device;
         std::mt19937 mt(random_device());
         std::uniform_real_distribution<double> score(-1.1, 1.1);
+//        std::uniform_real_distribution<double> score(-10, 10);
         for (int i=0; i<rbfCount; i++) {
             std::vector<double> tmpVector;
             for (int j=0; j<memoryOfModel; j++) {
@@ -59,27 +60,26 @@ public:
     void calculate(const std::vector<double> &inputsignal) {
         std::cout << "[TermRankingMethod] Start Calculate" << std::endl;
         
-        dataCount = inputsignal.size();
+        dataCount = inputsignal.size() - memoryOfModel;
         
         // 入力の平均
         double averageForInput = averageInVector(inputsignal);
         // 入力の平均と入力の差分
         double diffInputsignalAndAverage = diffBetweenVectorAndValue(inputsignal, averageForInput);
         
-        
         for (int iter=0; iter<rbfCount; iter++) {
             std::cout << "[TermRankingMethod] Calculate K = " << iter << std::endl;
             
             
             // 線形二乗法による最適化
-            std::vector<std::vector<double>> A = getPhis(inputsignal);
+            std::vector<std::vector<double>> A = getPhis(inputsignal, dataCount);
             std::vector<double> talpha = solveLeastSquaresMethod(A, inputsignal);
             
             
             // エラー計算
             std::vector<double> squaredErrors;
             for (int k=0; k<rbfCount; k++) {
-                std::vector<double> predictionOutputs = predictionFunctionOutputs(inputsignal, talpha, k);
+                std::vector<double> predictionOutputs = predictionFunctionOutputs(inputsignal, talpha, k, dataCount);
                 double squaredError = errorOfOneStepPrediction(inputsignal, predictionOutputs, diffInputsignalAndAverage);
                 squaredErrors.push_back(squaredError);
             }
@@ -112,20 +112,19 @@ public:
         }
         
         
-        // 最適化終了後、係数alphaの保存
-        std::vector<std::vector<double>> A = getPhis(inputsignal);
-        alpha = solveLeastSquaresMethod(A, inputsignal);
-        
-        
         std::cout << "[TermRankingMethod] End Calculate" << std::endl;
     }
     
-    std::vector<double> output(const std::vector<double> &inputsignal, const int &dataCount) const {
+    std::vector<double> output(const std::vector<double> &inputsignal, int rbfCount, const int &dataCount) {
         std::vector<double> outputs;
         std::vector<double> inputs;
         for (int i=0; i<memoryOfModel; i++) {
             inputs.push_back(inputsignal[i]);
         }
+        
+        // 係数alphaの保存
+        std::vector<std::vector<double>> A = getPhis(inputsignal, dataCount);
+        alpha = solveLeastSquaresMethod(A, inputsignal);
         
         for (int i=0; i<dataCount; i++) {
             double output = 0.0;
@@ -142,10 +141,10 @@ public:
                 }
             }
             
-            for (int t=memoryOfModel-1; t>0; t--) {
-                inputs[t] = inputs[t-1];
+            for (int t=0; t<memoryOfModel-1; t++) {
+                inputs[t+1] = inputs[t];
             }
-            inputs[0] = output;
+            inputs[memoryOfModel-1] = output;
             
             outputs.push_back(output);
         }
@@ -153,20 +152,20 @@ public:
     }
     
     // k番目の予測関数出力
-    std::vector<double> predictionFunctionOutputs(const std::vector<double> &inputsignal, const std::vector<double> &alpha, const int &k) const {
+    std::vector<double> predictionFunctionOutputs(const std::vector<double> &inputsignal, const std::vector<double> &talpha, const int &k, const int &dataCount) const {
         std::vector<double> outputs;
-        for (int i=0; i<dataCount-memoryOfModel; i++) {
+        for (int i=0; i<dataCount; i++) {
             double output = 0.0;
             for (int rbfIndex=0; rbfIndex<k; rbfIndex++) {
                 if (rbfIndex==0) {
-                    output += alpha[0];
+                    output += talpha[0];
                 }
                 else {
                     double squeredNorm = 0.0;
                     for (int j=0; j<memoryOfModel; j++) {
                         squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex][j]), 2);
                     }
-                    output += alpha[rbfIndex] * exp(-spread*squeredNorm);
+                    output += talpha[rbfIndex] * exp(-spread*squeredNorm);
                 }
             }
             outputs.push_back(output);
@@ -174,11 +173,11 @@ public:
         return outputs;
     }
     
-    std::vector<std::vector<double>> getPhis(const std::vector<double> &inputsignal) const {
+    std::vector<std::vector<double>> getPhis(const std::vector<double> &inputsignal, const int dataCount) const {
         std::vector<std::vector<double>> phis;
         for (int rbfIndex=0; rbfIndex<rbfCount; rbfIndex++) {
             std::vector<double> vector;
-            for (int i=0; i<dataCount-memoryOfModel; i++) {
+            for (int i=0; i<dataCount; i++) {
                 double output;
                 if (rbfIndex==0) {
                     output = 1.0;
@@ -190,7 +189,6 @@ public:
                     }
                     output = exp(-spread*squeredNorm);
                 }
-                
                 vector.push_back(output);
             }
             phis.push_back(vector);
@@ -237,6 +235,45 @@ public:
         return vo;
     }
     
+    int findBestModel(const std::vector<double> &inputsignal) {
+        double threshold = 0.05;
+        dataCount = inputsignal.size() - memoryOfModel;
+        // 最適なモデルが見つかるまでkを増やしながら試行していく
+        
+        int maxCount = 0;
+        int maxRbfIndex = 0;
+        for (int rbfIndex=1; rbfIndex<rbfCount; rbfIndex++) {
+            std::vector<double> toutput = output(inputsignal, rbfIndex, dataCount);
+            std::vector<double> diff;
+            for (int i=0; i<dataCount; i++) {
+                double diffa = pow(toutput[i] - inputsignal[i], 2);
+                diff.push_back(diffa);
+            }
+            int count = 0;
+            while (count < dataCount) {
+                double rms = 0;
+                for (int i=0; i<count; i++) {
+                    rms += diff[i];
+                }
+                rms /= count;
+                rms = sqrt(rms);
+                if (rms > threshold) {
+                    break;
+                }
+                
+                count++;
+            }
+            
+            if (maxCount < count) {
+                maxCount = count;
+                maxRbfIndex = rbfIndex;
+                std::cout << "[TermRankingMethod] findBestModel - " << count << std::endl;
+            }
+        }
+        
+        return maxRbfIndex;
+    }
+    
     double averageInVector(const std::vector<double> &vector) const {
         double average = 0.0;
         auto iter = vector.begin();
@@ -258,6 +295,7 @@ public:
         }
         return diff;
     }
+    
     
     // MARK: File Input
     void readAlpha(std::string fileName) {
@@ -288,8 +326,8 @@ public:
         rbfs = matrix;
     }
     
-    // MARK: File output
     
+    // MARK: File output
     void writeAlpha(std::string fileName) const {
         std::ofstream alphaFstream(fileName);
         for (int i=0; i<rbfCount; i++) {

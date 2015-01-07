@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <limits>
 
 #include "TermRankingMethod.h"
 
@@ -17,12 +18,13 @@
 #include "LorenzSystem.h"
 
 
+
 int main(int argc, const char * argv[]) {
     
     int rbfCount = 200;
-    int memoryOfModel = 10;
+    int memoryOfModel = 7;
     
-    int dataCount = 5000;
+    int dataCount = 1000;
     int startDataCount = 1000;
     
     bool readFromFile = false;
@@ -39,10 +41,31 @@ int main(int argc, const char * argv[]) {
     
     // Cropped Input
     std::vector<double> inputsignal;
+    
     for (int i=startDataCount; i<startDataCount+dataCount; i++) {
         inputsignal.push_back(tmp[i]);
     }
     
+//    LorenzSystem lorenzSystem = LorenzSystem();
+//    std::ofstream lorenzSystemStream("lorenzSystem.txt");
+//    for (int i=0; i<dataCount; i++) {
+//        lorenzSystemStream << lorenzSystem.x << " " << lorenzSystem.y << " " << lorenzSystem.z << std::endl;
+//        
+//        inputsignal.push_back(lorenzSystem.x);
+//        
+//        lorenzSystem.nextTime();
+//    }
+//    
+//    double max = std::numeric_limits<double>::min();
+//    double min = std::numeric_limits<double>::max();
+//    for (int i=0; i<inputsignal.size(); i++) {
+//        if (inputsignal[i] > max) {
+//            max = inputsignal[i];
+//        }
+//        if (inputsignal[i] < min) {
+//            min = inputsignal[i];
+//        }
+//    }
     
     // Term Ranking Method
     TermRankingMethod termRankingMethod(rbfCount, memoryOfModel);
@@ -53,7 +76,9 @@ int main(int argc, const char * argv[]) {
     else {
         termRankingMethod.calculate(inputsignal);
     }
-    std::vector<double> outputsignal = termRankingMethod.output(inputsignal, dataCount);
+    
+//    int bestRbfCount = termRankingMethod.findBestModel(inputsignal);
+    std::vector<double> outputsignal = termRankingMethod.output(inputsignal, rbfCount, dataCount - memoryOfModel);
     
     termRankingMethod.writeAlpha("alpha.txt");
     termRankingMethod.writeRBFs("rbfs.txt");
