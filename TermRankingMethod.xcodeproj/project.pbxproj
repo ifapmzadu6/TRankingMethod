@@ -25,6 +25,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		712C2A621A5D92530080E21C /* KMeansMethod.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KMeansMethod.h; sourceTree = "<group>"; };
 		71301A331A2B8128007A8CE4 /* TermRankingMethod */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TermRankingMethod; sourceTree = BUILT_PRODUCTS_DIR; };
 		71301A361A2B8128007A8CE4 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		71301A3E1A2B8236007A8CE4 /* Array */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Array; sourceTree = "<group>"; };
@@ -392,6 +393,7 @@
 				71301A361A2B8128007A8CE4 /* main.cpp */,
 				71301BA91A2B85B0007A8CE4 /* TermRankingMethod.h */,
 				71A8D9F91A453E8500B300A2 /* LorenzSystem.h */,
+				712C2A621A5D92530080E21C /* KMeansMethod.h */,
 				714C30251A39EF5600533FF3 /* analysis */,
 				714C30261A39EF6000533FF3 /* Wave */,
 				71301A3D1A2B8236007A8CE4 /* Eigen */,

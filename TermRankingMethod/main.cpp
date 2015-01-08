@@ -21,10 +21,10 @@
 
 int main(int argc, const char * argv[]) {
     
-    int rbfCount = 200;
+    int rbfCount = 400;
     int memoryOfModel = 7;
     
-    int dataCount = 1000;
+    int dataCount = 3000;
     int startDataCount = 1000;
     
     bool readFromFile = false;
@@ -43,8 +43,15 @@ int main(int argc, const char * argv[]) {
     std::vector<double> inputsignal;
     
     for (int i=startDataCount; i<startDataCount+dataCount; i++) {
-        inputsignal.push_back(tmp[i]);
+        double signal = (tmp[i] + 1.0) / 2.0;
+        inputsignal.push_back(signal);
     }
+    
+    std::ofstream inputStream("inputs.txt");
+    for (int i=0; i<inputsignal.size(); i++) {
+        inputStream << inputsignal[i] << std::endl;
+    }
+    inputStream.close();
     
 //    LorenzSystem lorenzSystem = LorenzSystem();
 //    std::ofstream lorenzSystemStream("lorenzSystem.txt");
@@ -77,7 +84,7 @@ int main(int argc, const char * argv[]) {
         termRankingMethod.calculate(inputsignal);
     }
     
-//    int bestRbfCount = termRankingMethod.findBestModel(inputsignal);
+    int bestRbfCount = termRankingMethod.findBestModel(inputsignal);
     std::vector<double> outputsignal = termRankingMethod.output(inputsignal, rbfCount, dataCount - memoryOfModel);
     
     termRankingMethod.writeAlpha("alpha.txt");

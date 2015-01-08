@@ -14,6 +14,7 @@
 #include <random>
 
 #include "Eigen/Dense"
+#include "KMeansMethod.h"
 
 class TermRankingMethod {
 public:
@@ -40,24 +41,26 @@ public:
     
     // コンストラクタ
     TermRankingMethod(int rbfCount, int memoryOfModel) : rbfCount(rbfCount), memoryOfModel(memoryOfModel) {
-        std::random_device random_device;
-        std::mt19937 mt(random_device());
-        std::uniform_real_distribution<double> score(-1.1, 1.1);
-//        std::uniform_real_distribution<double> score(-10, 10);
-        for (int i=0; i<rbfCount; i++) {
-            std::vector<double> tmpVector;
-            for (int j=0; j<memoryOfModel; j++) {
-                double random = score(mt);
-                tmpVector.push_back(random);
-            }
-            rbfs.push_back(tmpVector);
-        }
-        spread = 1.0;
+        spread = 0.5;
     }
     
     
     // 実行
     void calculate(const std::vector<double> &inputsignal) {
+        
+        KMeansMethod kmeans;
+        std::vector<std::vector<double>> cluster = kmeans.calculate(inputsignal, memoryOfModel, rbfCount);
+        rbfs = cluster;
+        std::ofstream stream("cluster.txt");
+        for (int i=0; i<cluster.size(); i++) {
+            std::vector<double> vector = cluster[i];
+            for (int j=0; j<vector.size(); j++) {
+                stream << vector[j] << " ";
+            }
+            stream << std::endl;
+        }
+        stream.close();
+        
         std::cout << "[TermRankingMethod] Start Calculate" << std::endl;
         
         dataCount = inputsignal.size() - memoryOfModel;
