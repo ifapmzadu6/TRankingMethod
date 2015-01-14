@@ -21,11 +21,12 @@
 
 int main(int argc, const char * argv[]) {
     
-    int rbfCount = 400;
+    int rbfCount = 500;
     int memoryOfModel = 7;
+    double spread = 0.05;
     
-    int dataCount = 3000;
-    int startDataCount = 1000;
+    int dataCount = 2000;
+    int startDataCount = 5000;
     
     bool readFromFile = false;
     
@@ -43,15 +44,9 @@ int main(int argc, const char * argv[]) {
     std::vector<double> inputsignal;
     
     for (int i=startDataCount; i<startDataCount+dataCount; i++) {
-        double signal = (tmp[i] + 1.0) / 2.0;
+        double signal = tmp[i];
         inputsignal.push_back(signal);
     }
-    
-    std::ofstream inputStream("inputs.txt");
-    for (int i=0; i<inputsignal.size(); i++) {
-        inputStream << inputsignal[i] << std::endl;
-    }
-    inputStream.close();
     
 //    LorenzSystem lorenzSystem = LorenzSystem();
 //    std::ofstream lorenzSystemStream("lorenzSystem.txt");
@@ -75,7 +70,7 @@ int main(int argc, const char * argv[]) {
 //    }
     
     // Term Ranking Method
-    TermRankingMethod termRankingMethod(rbfCount, memoryOfModel);
+    TermRankingMethod termRankingMethod(rbfCount, memoryOfModel, spread);
     if (readFromFile) {
         termRankingMethod.readAlpha("alpha.txt");
         termRankingMethod.readRBFs("rbfs.txt");
@@ -85,7 +80,8 @@ int main(int argc, const char * argv[]) {
     }
     
     int bestRbfCount = termRankingMethod.findBestModel(inputsignal);
-    std::vector<double> outputsignal = termRankingMethod.output(inputsignal, rbfCount, dataCount - memoryOfModel);
+//    std::vector<double> outputsignal = termRankingMethod.output(inputsignal, bestRbfCount, dataCount - memoryOfModel);
+    std::vector<double> outputsignal = termRankingMethod.output(inputsignal, rbfCount-1, dataCount - memoryOfModel);
     
     termRankingMethod.writeAlpha("alpha.txt");
     termRankingMethod.writeRBFs("rbfs.txt");
