@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
     
     int rbfCount = 500;
     int memoryOfModel = 7;
-    double spread = 0.05;
+    double spread = 0.01;
     
     int dataCount = 2000;
     int startDataCount = 5000;
@@ -104,6 +104,15 @@ int main(int argc, const char * argv[]) {
     }
     fstream.close();
     std::system("/usr/local/bin/gnuplot -persist -e \" p 'result.txt' u 1:2 w l, '' u 1:3 w l \"");
+    
+    // 環境を保存
+    std::ofstream tfstream("環境.txt");
+    tfstream << "rbfCount = " << rbfCount << std::endl;
+    tfstream << "memoryOfModel = " << memoryOfModel << std::endl;
+    tfstream << "spread = " << spread << std::endl;
+    tfstream << "dataCount = " << dataCount << std::endl;
+    tfstream << "startDataCount = " << startDataCount << std::endl;
+    
     
     return 0;
 }
