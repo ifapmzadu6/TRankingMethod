@@ -13,7 +13,7 @@
 #include "TermRankingMethod.h"
 
 #include "Wave.h"
-//#include "analysis.h"
+#include "analysis.h"
 
 #include "LorenzSystem.h"
 
@@ -21,31 +21,47 @@
 
 int main(int argc, const char * argv[]) {
     
-    int rbfCount = 500;
+    int rbfCount = 50;
     int memoryOfModel = 7;
-    double spread = 0.01;
+    double spread = 0.2;
     
-    int dataCount = 2000;
-    int startDataCount = 5000;
+//    int dataCount = 1000;
+//    int startDataCount = 5000;
+    
+    int dataCount = 500;
+    int startDataCount = 100;
     
     bool readFromFile = false;
     
     // Get sound wave.
     std::vector<double> tmp;
+    std::vector<int> fp;
     Wave wav;
     if(wav.InputWave("sample.wav") != 0)
         return -1;
     wav.StereoToMono();
     wav.Normalize();
     wav.GetData(tmp);
-    std::cout << tmp.size() << std::endl;
+    GetFlucPeriod(fp, tmp);
+    std::cout << fp.size() << std::endl;
     
     // Cropped Input
     std::vector<double> inputsignal;
     
-    for (int i=startDataCount; i<startDataCount+dataCount; i++) {
-        double signal = tmp[i];
-        inputsignal.push_back(signal);
+//    for (int i=startDataCount; i<startDataCount+dataCount; i++) {
+//        double signal = (tmp[i] + 1.0) / 2.0;
+//        inputsignal.push_back(signal);
+//    }
+    
+//     Nomilization
+    double max = 0, min = std::numeric_limits<double>::max();
+    for (int i = startDataCount; i < startDataCount + dataCount; i++) {
+        if (max < fp[i]) max = fp[i];
+        if (min > fp[i]) min = fp[i];
+    }
+    for (int i = startDataCount; i < startDataCount + dataCount; i++) {
+        double value = ((double)fp[i] - min) / (max - min);
+        inputsignal.push_back(value);
     }
     
 //    LorenzSystem lorenzSystem = LorenzSystem();
@@ -69,6 +85,7 @@ int main(int argc, const char * argv[]) {
 //        }
 //    }
     
+    
     // Term Ranking Method
     TermRankingMethod termRankingMethod(rbfCount, memoryOfModel, spread);
     if (readFromFile) {
@@ -79,7 +96,7 @@ int main(int argc, const char * argv[]) {
         termRankingMethod.calculate(inputsignal);
     }
     
-    int bestRbfCount = termRankingMethod.findBestModel(inputsignal);
+//    int bestRbfCount = termRankingMethod.findBestModel(inputsignal);
 //    std::vector<double> outputsignal = termRankingMethod.output(inputsignal, bestRbfCount, dataCount - memoryOfModel);
     std::vector<double> outputsignal = termRankingMethod.output(inputsignal, rbfCount-1, dataCount - memoryOfModel);
     
@@ -112,6 +129,7 @@ int main(int argc, const char * argv[]) {
     tfstream << "spread = " << spread << std::endl;
     tfstream << "dataCount = " << dataCount << std::endl;
     tfstream << "startDataCount = " << startDataCount << std::endl;
+    tfstream.close();
     
     
     return 0;

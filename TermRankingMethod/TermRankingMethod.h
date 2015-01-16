@@ -119,7 +119,7 @@ public:
         }
         
         // 係数alphaの保存
-        std::vector<std::vector<double>> A = getPhis(inputsignal, rbfCount, dataCount);
+        std::vector<std::vector<double>> A = getPhis(inputsignal, rbfCount-1, dataCount);
         alpha = solveLeastSquaresMethod(A, inputsignal);
         
         for (int i=0; i<dataCount; i++) {
@@ -131,7 +131,7 @@ public:
                 else {
                     double squeredNorm = 0.0;
                     for (int j=0; j<memoryOfModel; j++) {
-                        squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex-1][j]), 2);
+                        squeredNorm += pow((inputs[j]-rbfs[rbfIndex-1][j]), 2);
                     }
                     output += alpha[rbfIndex] * exp(-spread*squeredNorm);
                 }
@@ -180,7 +180,8 @@ public:
                 else {
                     double squeredNorm = 0.0;
                     for (int j=0; j<memoryOfModel; j++) {
-                        squeredNorm += pow((inputsignal[i+j]-rbfs[rbfIndex-1][j]), 2);
+                        double tmp = pow((inputsignal[i+j]-rbfs[rbfIndex-1][j]), 2);
+                        squeredNorm += tmp;
                     }
                     output = exp(-spread*squeredNorm);
                 }
@@ -228,7 +229,7 @@ public:
     }
     
     int findBestModel(const std::vector<double> &inputsignal) {
-        double threshold = 0.1;
+        double threshold = 0.05;
         dataCount = inputsignal.size() - memoryOfModel;
         // 最適なモデルが見つかるまでkを増やしながら試行していく
         
@@ -334,7 +335,7 @@ public:
     void readAlpha(std::string fileName) {
         std::vector<double> vector;
         std::ifstream alphaIstream(fileName);
-        for (int i=0; i<rbfCount; i++) {
+        for (int i=0; i<rbfCount-1; i++) {
             std::string string;
             std::getline(alphaIstream, string);
             double value = std::stof(string);
@@ -363,7 +364,7 @@ public:
     // MARK: File output
     void writeAlpha(std::string fileName) const {
         std::ofstream alphaFstream(fileName);
-        for (int i=0; i<rbfCount; i++) {
+        for (int i=0; i<rbfCount-1; i++) {
             alphaFstream << alpha[i] << std::endl;
         }
         alphaFstream.close();
