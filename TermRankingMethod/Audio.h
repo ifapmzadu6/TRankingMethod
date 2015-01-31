@@ -29,7 +29,7 @@ public:
     /**
      * 実データ1次元離散フーリエ変換（One-Dimensioanal DFTs of Real Data）
      */
-    std::vector<AudioComplex> dft_r2c_1d_vector(std::vector<double> input_vector, unsigned flags) {
+    static std::vector<AudioComplex> dft_r2c_1d_vector(std::vector<double> input_vector, int fft_size, unsigned flags) {
         
         int n = (int)input_vector.size();
         double *input = (double *)malloc(sizeof(double) * n);
@@ -38,7 +38,7 @@ public:
         }
         fftw_complex *output = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n);
         
-        fftw_plan plan = fftw_plan_dft_r2c_1d(n, input, output, FFTW_ESTIMATE);
+        fftw_plan plan = fftw_plan_dft_r2c_1d(fft_size, input, output, FFTW_ESTIMATE);
         fftw_execute(plan);
         
         std::vector<AudioComplex> output_vector;

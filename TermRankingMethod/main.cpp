@@ -21,8 +21,12 @@
 
 int main(int argc, const char * argv[]) {
     
+    using namespace std;
+    
     MelScale a;
-    a.melFilterBank(44100, 44100, 20);
+    vector<FilterBank> melFilterBank = a.melFilterBank(44100, 44100, 20);
+    
+    MelScale::plotMelFilterBank(44100, 44100, 20);
     
     int rbfCount = 100;
     int memoryOfModel = 7;
@@ -39,8 +43,8 @@ int main(int argc, const char * argv[]) {
     bool readFromFile = false;
     
     // Get sound wave.
-    std::vector<double> tmp;
-    std::vector<int> fp;
+    vector<double> tmp;
+    vector<int> fp;
     Wave wav;
     if(wav.InputWave("sample.wav") != 0)
         return -1;
@@ -48,9 +52,9 @@ int main(int argc, const char * argv[]) {
     wav.Normalize();
     wav.GetData(tmp);
     GetFlucPeriod(fp, tmp);
-    std::cout << fp.size() << std::endl;
+    cout << fp.size() << endl;
     
-    std::vector<double> inputsignal;
+    vector<double> inputsignal;
     
     
     for (int i=startDataCount; i<startDataCount+dataCount; i++) {
@@ -58,15 +62,14 @@ int main(int argc, const char * argv[]) {
         inputsignal.push_back(signal);
     }
     
-    std::vector<double> windowed = Window::hamming(inputsignal);
+    vector<double> windowed = Window::hamming(inputsignal);
     
-    Audio audio;
-    std::vector<AudioComplex> outputs = audio.dft_r2c_1d_vector(windowed, 0);
+    vector<AudioComplex> outputs = Audio::dft_r2c_1d_vector(windowed, 44100, 0);
     
     
     
 //     Nomilization
-//    double max = 0, min = std::numeric_limits<double>::max();
+//    double max = 0, min = numeric_limits<double>::max();
 //    for (int i = startDataCount; i < startDataCount + dataCount; i++) {
 //        if (max < fp[i]) max = fp[i];
 //        if (min > fp[i]) min = fp[i];
@@ -85,17 +88,17 @@ int main(int argc, const char * argv[]) {
     
 //    // ローレンツシステム
 //    LorenzSystem lorenzSystem = LorenzSystem();
-//    std::ofstream lorenzSystemStream("lorenzSystem.txt");
+//    ofstream lorenzSystemStream("lorenzSystem.txt");
 //    for (int i=0; i<dataCount; i++) {
-//        lorenzSystemStream << lorenzSystem.x << " " << lorenzSystem.y << " " << lorenzSystem.z << std::endl;
+//        lorenzSystemStream << lorenzSystem.x << " " << lorenzSystem.y << " " << lorenzSystem.z << endl;
 //        
 //        inputsignal.push_back(lorenzSystem.x);
 //        
 //        lorenzSystem.nextTime();
 //    }
 //    
-//    double max = std::numeric_limits<double>::min();
-//    double min = std::numeric_limits<double>::max();
+//    double max = numeric_limits<double>::min();
+//    double min = numeric_limits<double>::max();
 //    for (int i=0; i<inputsignal.size(); i++) {
 //        if (inputsignal[i] > max) {
 //            max = inputsignal[i];
@@ -105,7 +108,7 @@ int main(int argc, const char * argv[]) {
 //        }
 //    }
     
-    std::vector<double> amp_dft;
+    vector<double> amp_dft;
     for (int i=0; i<outputs.size(); i++) {
         double amp = sqrt(pow(outputs[i].re, 2) + pow(outputs[i].im, 2));
         double log_amp = log10(amp);
@@ -113,20 +116,20 @@ int main(int argc, const char * argv[]) {
     }
     
     double index = 0.0;
-    std::ofstream fft("fft.txt");
+    ofstream fft("fft.txt");
     while (true) {
         double mel = MelScale::mel2hz_stevens(index);
         if (index >= outputs.size()) {
             break;
         }
         fft << mel << " ";
-        fft << amp_dft[index] << std::endl;
+        fft << amp_dft[index] << endl;
         
         index++;
     }
     fft.close();
     
-    std::system("/usr/local/bin/gnuplot -persist -e \"set xr [0:5000]; p 'fft.txt' u 1:2 w l \"");
+    system("/usr/local/bin/gnuplot -persist -e \"set xr [0:5000]; p 'fft.txt' u 1:2 w l \"");
     
 
 //    // Term Ranking Method
@@ -140,8 +143,8 @@ int main(int argc, const char * argv[]) {
 //    }
 //    
 ////    int bestRbfCount = termRankingMethod.findBestModel(inputsignal);
-////    std::vector<double> outputsignal = termRankingMethod.output(inputsignal, bestRbfCount, dataCount);
-//    std::vector<double> outputsignal = termRankingMethod.output(inputsignal, rbfCount, dataCount);
+////    vector<double> outputsignal = termRankingMethod.output(inputsignal, bestRbfCount, dataCount);
+//    vector<double> outputsignal = termRankingMethod.output(inputsignal, rbfCount, dataCount);
 //    
 //    termRankingMethod.writeAlpha("alpha.txt");
 //    termRankingMethod.writeRBFs("rbfs.txt");
@@ -152,28 +155,37 @@ int main(int argc, const char * argv[]) {
 //    for (int i=0; i<dataCount; i++) {
 //        error += pow((inputsignal[i]-outputsignal[i]), 2);
 //    }
-//    std::cout << error << std::endl;
+//    cout << error << endl;
 //    
 //    
 //    // Gnuplot
-//    std::ofstream fstream("result.txt");
+//    ofstream fstream("result.txt");
 //    for (int i=0; i<dataCount; i++) {
 //        fstream << i << " ";
 //        fstream << inputsignal[i] << " ";
-//        fstream << outputsignal[i] << std::endl;
+//        fstream << outputsignal[i] << endl;
 //    }
 //    fstream.close();
-//    std::system("/usr/local/bin/gnuplot -persist -e \"set xr [0:1000]; p 'result.txt' u 1:2 w l, '' u 1:3 w l \"");
+//    system("/usr/local/bin/gnuplot -persist -e \"set xr [0:1000]; p 'result.txt' u 1:2 w l, '' u 1:3 w l \"");
 //    
 //    // 環境を保存
-//    std::ofstream tfstream("環境.txt");
-//    tfstream << "rbfCount = " << rbfCount << std::endl;
-//    tfstream << "memoryOfModel = " << memoryOfModel << std::endl;
-//    tfstream << "spread = " << spread << std::endl;
-//    tfstream << "dataCount = " << dataCount << std::endl;
-//    tfstream << "startDataCount = " << startDataCount << std::endl;
+//    ofstream tfstream("環境.txt");
+//    tfstream << "rbfCount = " << rbfCount << endl;
+//    tfstream << "memoryOfModel = " << memoryOfModel << endl;
+//    tfstream << "spread = " << spread << endl;
+//    tfstream << "dataCount = " << dataCount << endl;
+//    tfstream << "startDataCount = " << startDataCount << endl;
 //    tfstream.close();
     
     
     return 0;
 }
+
+
+
+
+
+
+
+
+

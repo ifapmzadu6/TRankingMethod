@@ -10,7 +10,13 @@
 #define TermRankingMethod_MelScale_h
 
 #include <cmath>
+#include <string>
+#include <fstream>
 
+struct FilterBank {
+    int startIndex;
+    std::vector<double> filter;
+};
 
 class MelScale {
 public:
@@ -49,7 +55,7 @@ public:
     /**
      * メルフィルタバンクを作成
      */
-    static std::vector<std::vector<double>> melFilterBank(double fs, double nfft, int numChannels) {
+    static std::vector<FilterBank> melFilterBank(double fs, double nfft, int numChannels) {
         
         // ナイキスト周波数
         double fmax = fs / 2;
@@ -100,14 +106,14 @@ public:
         indexStops.push_back(nmax);
         
         // フィルタバンクの作成
-        std::vector<std::vector<double>> filterBanks;
+        std::vector<FilterBank> filterBanks;
         for (int i=0; i<numChannels; i++) {
             // 三角フィルタの左の直線の傾きから点を求める
             double increment = 1.0 / (indexCenters[i] - indexStarts[i]);
-            std::vector<double> filterBank;
+            std::vector<double> filter;
             for (int j=indexStarts[i]; j<indexCenters[i]; j++) {
                 double filterValue = (j - indexStarts[i]) * increment;
-                filterBank.push_back(filterValue);
+                filter.push_back(filterValue);
             }
             
             // 三角フィルタの右の直線の傾きから点を求める
@@ -115,9 +121,12 @@ public:
             std::vector<double> decrementVector;
             for (int j=indexCenters[i]; j<indexStops[i]; j++) {
                 double filterValue = 1.0 - ((j - indexCenters[i]) * decrement);
-                filterBank.push_back(filterValue);
+                filter.push_back(filterValue);
             }
             
+            FilterBank filterBank;
+            filterBank.startIndex = indexStarts[i];
+            filterBank.filter = filter;
             filterBanks.push_back(filterBank);
         }
         
@@ -180,7 +189,28 @@ public:
      */
     
     
-    
+    static void plotMelFilterBank(double fs, double nfft, int numChannels) {
+        
+        MelScale a;
+        std::vector<FilterBank> melFilterBank = a.melFilterBank(fs, nfft, numChannels);
+        
+        for (int k=0; k<melFilterBank.size(); k++) {
+            std::ofstream tmpstream("melfilter" + std::to_string(k));
+            for (int i=0; i<melFilterBank[k].filter.size(); i++) {
+                tmpstream << melFilterBank[k].startIndex + i << " ";
+                tmpstream << melFilterBank[k].filter[i] << std::endl;
+            }
+            tmpstream.close();
+        }
+        
+        std::string pipe = "/usr/local/bin/gnuplot -persist -e \" p ";
+        for (int i=0; i<numChannels; i++) {
+            pipe += "'melfilter" + std::to_string(i) + "' w l notitle,";
+        }
+        pipe += "\"";
+        
+        system(pipe.c_str());
+    }
 };
 
 #endif
