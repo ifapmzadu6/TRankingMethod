@@ -23,11 +23,6 @@ int main(int argc, const char * argv[]) {
     
     using namespace std;
     
-    MelScale a;
-    vector<FilterBank> melFilterBank = a.melFilterBank(44100, 44100, 20);
-    
-    MelScale::plotMelFilterBank(44100, 44100, 20);
-    
     int rbfCount = 100;
     int memoryOfModel = 7;
     double spread = 1.0 / (2*1.);
@@ -43,28 +38,31 @@ int main(int argc, const char * argv[]) {
     bool readFromFile = false;
     
     // Get sound wave.
-    vector<double> tmp;
+    vector<double> wave;
     vector<int> fp;
     Wave wav;
     if(wav.InputWave("sample.wav") != 0)
         return -1;
     wav.StereoToMono();
     wav.Normalize();
-    wav.GetData(tmp);
-    GetFlucPeriod(fp, tmp);
+    wav.GetData(wave);
+    int samplePerSec = wav.GetSamplesPerSec();
+    
+    // Analyze
+    GetFlucPeriod(fp, wave);
     cout << fp.size() << endl;
     
     vector<double> inputsignal;
     
-    
     for (int i=startDataCount; i<startDataCount+dataCount; i++) {
-        double signal = (tmp[i] + 1.0) / 2.0;
+        double signal = (wave[i] + 1.0) / 2.0;
         inputsignal.push_back(signal);
     }
     
     vector<double> windowed = Window::hamming(inputsignal);
     
-    vector<AudioComplex> outputs = Audio::dft_r2c_1d_vector(windowed, 44100, 0);
+    double fft_size = 44100;
+    vector<AudioComplex> outputs = Audio::dft_r2c_1d_vector(windowed, fft_size, 0);
     
     
     
@@ -109,29 +107,90 @@ int main(int argc, const char * argv[]) {
 //    }
     
     vector<double> amp_dft;
-    for (int i=0; i<outputs.size(); i++) {
+    for (int i=0; i<fft_size/2; i++) {
         double amp = sqrt(pow(outputs[i].re, 2) + pow(outputs[i].im, 2));
-        double log_amp = log10(amp);
-        amp_dft.push_back(log_amp);
+        amp_dft.push_back(amp);
     }
     
     double index = 0.0;
+
     ofstream fft("fft.txt");
     while (true) {
         double mel = MelScale::mel2hz_stevens(index);
-        if (index >= outputs.size()) {
+        if (mel >= amp_dft.size()) {
             break;
         }
         fft << mel << " ";
-        fft << amp_dft[index] << endl;
+        fft << log10(amp_dft[mel]) << endl;
         
         index++;
     }
     fft.close();
     
-    system("/usr/local/bin/gnuplot -persist -e \"set xr [0:5000]; p 'fft.txt' u 1:2 w l \"");
+    system("/usr/local/bin/gnuplot -persist -e \"p 'fft.txt' w l \"");
     
-
+    // メルフィルタバンクに変換
+    ofstream melfilterbank("melfilterbank.txt");
+    
+    vector<MelFilterBank> melFilterBank = MelScale::melFilterBank(samplePerSec, fft_size, 96);
+    vector<double> melSpectrum;
+    for (int i=0; i<melFilterBank.size(); i++) {
+        double d = 0;
+        for (int j=0; j<(melFilterBank[i].stopIndex - melFilterBank[i].startIndex); j++) {
+            double s = melFilterBank[i].filter[j] * amp_dft[j + melFilterBank[i].startIndex];
+            d += s;
+        }
+        melfilterbank << melFilterBank[i].centerIndex << " ";
+        melfilterbank << log10(d) << endl;
+        
+        melSpectrum.push_back(log10(d));
+    }
+    
+    melfilterbank.close();
+    
+    system("/usr/local/bin/gnuplot -persist -e \"p 'melfilterbank.txt' w l\"");
+    
+    
+    
+    // メル周波数ケプストラム
+    vector<double> dct = Audio::dct_r2r_1d_vector(melSpectrum);
+    
+    ofstream melCepstral("melcepstral.txt");
+    
+    for (int i=0; i<dct.size(); i++) {
+        melCepstral << dct[i] << endl;
+    }
+    
+    melCepstral.close();
+    
+    system("/usr/local/bin/gnuplot -persist -e \"p 'melcepstral.txt' w l\"");
+    
+    
+    // メル周波数ケプストラム係数(12次元分だけ利用する)
+    vector<double> mfcc;
+    for (int i=1; i<12+1; i++) {
+        mfcc.push_back(dct[i]);
+    }
+    
+    
+    ofstream mfccfstream("mfcc.txt");
+    
+    for (int i=0; i<mfcc.size(); i++) {
+        mfccfstream << mfcc[i] << endl;
+    }
+    
+    mfccfstream.close();
+    
+    system("/usr/local/bin/gnuplot -persist -e \"p 'mfcc.txt' w l\"");
+    
+    
+    
+    
+    
+    
+    
+    
+    
 //    // Term Ranking Method
 //    TermRankingMethod termRankingMethod(rbfCount, memoryOfModel, spread);
 //    if (readFromFile) {

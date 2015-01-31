@@ -31,7 +31,7 @@
 		71301BA91A2B85B0007A8CE4 /* TermRankingMethod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TermRankingMethod.h; sourceTree = "<group>"; };
 		7133ECB51A749B5000ECF2F1 /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		7133ECB61A753FD500ECF2F1 /* Window.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Window.h; sourceTree = "<group>"; };
-		713C22C11A7A7E6B00C2C00F /* MelScale.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MelScale.h; sourceTree = "<group>"; };
+		713C22C11A7A7E6B00C2C00F /* MelScale.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = MelScale.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		715309DA1A391941002CDEC7 /* analysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = analysis.cpp; sourceTree = "<group>"; };
 		715309DB1A391941002CDEC7 /* analysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = analysis.h; sourceTree = "<group>"; };
 		715309DC1A391941002CDEC7 /* Wave.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Wave.cpp; sourceTree = "<group>"; };

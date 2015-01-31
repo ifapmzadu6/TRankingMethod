@@ -752,3 +752,15 @@ void Wave::ResamplingSinc(const unsigned short resampling,const int sincLengthHa
 		}
 	}
 }
+
+
+/*--------------------------------------------------------------------------
+ * Resampling Wave for Sinc
+ */
+int Wave::GetSamplesPerSec()
+{
+    return samplesPerSec;
+}
+
+
+

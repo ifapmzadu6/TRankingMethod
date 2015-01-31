@@ -172,6 +172,8 @@ public:
 	// Get StereoData
 	void GetData( std::vector<double>& stereoL , std::vector<double>& stereoR );
     //	std::vector<int> GetFreqFluc();
+    
+    int GetSamplesPerSec();
 };
 
 #endif /* defined(__FireflyProject__Wave__) */

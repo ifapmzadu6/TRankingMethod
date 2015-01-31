@@ -13,8 +13,10 @@
 #include <string>
 #include <fstream>
 
-struct FilterBank {
+struct MelFilterBank {
     int startIndex;
+    int centerIndex;
+    int stopIndex;
     std::vector<double> filter;
 };
 
@@ -55,7 +57,7 @@ public:
     /**
      * メルフィルタバンクを作成
      */
-    static std::vector<FilterBank> melFilterBank(double fs, double nfft, int numChannels) {
+    static std::vector<MelFilterBank> melFilterBank(double fs, double nfft, int numChannels) {
         
         // ナイキスト周波数
         double fmax = fs / 2;
@@ -106,7 +108,7 @@ public:
         indexStops.push_back(nmax);
         
         // フィルタバンクの作成
-        std::vector<FilterBank> filterBanks;
+        std::vector<MelFilterBank> filterBanks;
         for (int i=0; i<numChannels; i++) {
             // 三角フィルタの左の直線の傾きから点を求める
             double increment = 1.0 / (indexCenters[i] - indexStarts[i]);
@@ -124,8 +126,10 @@ public:
                 filter.push_back(filterValue);
             }
             
-            FilterBank filterBank;
+            MelFilterBank filterBank;
             filterBank.startIndex = indexStarts[i];
+            filterBank.centerIndex = indexCenters[i];
+            filterBank.stopIndex = indexStops[i];
             filterBank.filter = filter;
             filterBanks.push_back(filterBank);
         }
@@ -192,7 +196,7 @@ public:
     static void plotMelFilterBank(double fs, double nfft, int numChannels) {
         
         MelScale a;
-        std::vector<FilterBank> melFilterBank = a.melFilterBank(fs, nfft, numChannels);
+        std::vector<MelFilterBank> melFilterBank = a.melFilterBank(fs, nfft, numChannels);
         
         for (int k=0; k<melFilterBank.size(); k++) {
             std::ofstream tmpstream("melfilter" + std::to_string(k));
