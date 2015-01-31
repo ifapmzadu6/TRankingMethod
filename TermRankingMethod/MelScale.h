@@ -49,7 +49,7 @@ public:
     /**
      * メルフィルタバンクを作成
      */
-    void melFilterBank(double fs, double nfft, int numChannels) {
+    static std::vector<std::vector<double>> melFilterBank(double fs, double nfft, int numChannels) {
         
         // ナイキスト周波数
         double fmax = fs / 2;
@@ -86,7 +86,42 @@ public:
         }
         
         // 各フィルタの開始位置のインデックス
-        std::vector<double> 
+        std::vector<double> indexStarts;
+        indexStarts.push_back(0.0);
+        for (int i=0; i<numChannels-1; i++) {
+            indexStarts.push_back(indexCenters[i]);
+        }
+        
+        // 各フィルタの終了位置のインデックス
+        std::vector<double> indexStops;
+        for (int i=1; i<numChannels; i++) {
+            indexStops.push_back(indexCenters[i]);
+        }
+        indexStops.push_back(nmax);
+        
+        // フィルタバンクの作成
+        std::vector<std::vector<double>> filterBanks;
+        for (int i=0; i<numChannels; i++) {
+            // 三角フィルタの左の直線の傾きから点を求める
+            double increment = 1.0 / (indexCenters[i] - indexStarts[i]);
+            std::vector<double> filterBank;
+            for (int j=indexStarts[i]; j<indexCenters[i]; j++) {
+                double filterValue = (j - indexStarts[i]) * increment;
+                filterBank.push_back(filterValue);
+            }
+            
+            // 三角フィルタの右の直線の傾きから点を求める
+            double decrement = 1.0 / (indexStops[i] - indexCenters[i]);
+            std::vector<double> decrementVector;
+            for (int j=indexCenters[i]; j<indexStops[i]; j++) {
+                double filterValue = 1.0 - ((j - indexCenters[i]) * decrement);
+                filterBank.push_back(filterValue);
+            }
+            
+            filterBanks.push_back(filterBank);
+        }
+        
+        return filterBanks;
     }
     
     

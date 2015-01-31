@@ -21,6 +21,9 @@
 
 int main(int argc, const char * argv[]) {
     
+    MelScale a;
+    a.melFilterBank(44100, 44100, 20);
+    
     int rbfCount = 100;
     int memoryOfModel = 7;
     double spread = 1.0 / (2*1.);
