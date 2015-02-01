@@ -55,12 +55,12 @@ public:
         
         dataCount = inputsignal.size() - memoryOfModel;
         
-//        // 入力の平均
-//        double averageForInput = averageInVector(inputsignal);
-//        // 入力の平均と入力の差分
-//        double diffInputsignalAndAverage = diffBetweenVectorAndValue(inputsignal, averageForInput);
-//        
-//        
+        // 入力の平均
+        double averageForInput = averageInVector(inputsignal);
+        // 入力の平均と入力の差分
+        double diffInputsignalAndAverage = diffBetweenVectorAndValue(inputsignal, averageForInput);
+        
+        
 //        for (int iter=0; iter<rbfCount; iter++) {
 //            std::cout << "[TermRankingMethod] Calculate K = " << iter << std::endl;
 //            

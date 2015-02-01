@@ -37,6 +37,7 @@
 		715309DC1A391941002CDEC7 /* Wave.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Wave.cpp; sourceTree = "<group>"; };
 		715309DD1A391941002CDEC7 /* Wave.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Wave.h; sourceTree = "<group>"; };
 		71A8D9F91A453E8500B300A2 /* LorenzSystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LorenzSystem.h; sourceTree = "<group>"; };
+		71C9F58A1A7DB01200124006 /* RosenbergWave.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RosenbergWave.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +77,7 @@
 				7133ECB51A749B5000ECF2F1 /* Audio.h */,
 				7133ECB61A753FD500ECF2F1 /* Window.h */,
 				713C22C11A7A7E6B00C2C00F /* MelScale.h */,
+				71C9F58A1A7DB01200124006 /* RosenbergWave.h */,
 				714C30251A39EF5600533FF3 /* analysis */,
 				714C30261A39EF6000533FF3 /* Wave */,
 			);
